@@ -1,0 +1,9 @@
+{
+  "name": "Airfoil Atlas",
+  "short_name": "Airfoils",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b1320",
+  "theme_color": "#0b1320",
+  "icons": [{"src":"favicon.svg","sizes":"any","type":"image/svg+xml"}]
+}

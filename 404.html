@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1320">
+  <meta name="description" content="Search, rank, compare, and test airfoils for UAV and aircraft projects.">
+  <title>Airfoil Atlas</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#airfoils" aria-label="Airfoil Atlas home">
+      <svg class="brand-mark" viewBox="0 0 64 32" aria-hidden="true">
+        <path d="M2 18C17 5 38 4 62 14C40 16 19 20 2 18Z" fill="currentColor"/>
+      </svg>
+      <span><strong>Airfoil Atlas</strong><small>Project airfoil database</small></span>
+    </a>
+    <nav class="main-nav" aria-label="Primary navigation">
+      <button data-view="airfoils" class="nav-button active">Wing airfoils</button>
+      <button data-view="stabilizers" class="nav-button">Stabilizer foils</button>
+      <button data-view="want" class="nav-button">Want to try <span id="wantCount" class="count-badge">0</span></button>
+      <button data-view="tried" class="nav-button">Tried <span id="triedCount" class="count-badge">0</span></button>
+      <button data-view="compare" class="nav-button">Compare <span id="compareCount" class="count-badge">0</span></button>
+    </nav>
+    <div class="top-actions">
+      <button id="projectButton" class="button secondary">Project settings</button>
+      <button id="dataButton" class="button secondary">Data</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero compact">
+      <div>
+        <p class="eyebrow">AIRFOIL SELECTION WORKSPACE</p>
+        <h1 id="viewTitle">Wing airfoils</h1>
+        <p id="viewDescription" class="lede">Rank every catalog entry against your aircraft’s operating point. Filters change relevance colors and order; they do not remove candidates.</p>
+      </div>
+      <div class="operating-summary" id="operatingSummary" aria-live="polite"></div>
+    </section>
+
+    <section id="catalogView" class="workspace">
+      <aside class="filters-panel" aria-label="Ranking filters">
+        <div class="panel-heading">
+          <div><span class="eyebrow">PREFERENCES</span><h2>Relevance model</h2></div>
+          <button id="resetFilters" class="text-button">Reset</button>
+        </div>
+
+        <label class="field">
+          <span>Mission priority</span>
+          <select id="missionFilter">
+            <option value="general">Balanced / general</option>
+            <option value="endurance">Endurance and efficiency</option>
+            <option value="high-lift">High lift / low stall speed</option>
+            <option value="payload">Payload carrying</option>
+            <option value="aerobatic">Maneuverability / aerobatic</option>
+            <option value="roughness">Roughness tolerance</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Preferred family</span>
+          <select id="familyFilter"><option value="any">Any family</option></select>
+        </label>
+
+        <div class="field-group">
+          <span class="field-label">Thickness preference (% chord)</span>
+          <div class="inline-fields">
+            <label><span>Min</span><input id="thicknessMin" type="number" min="0" max="50" step="0.5" placeholder="Any"></label>
+            <label><span>Max</span><input id="thicknessMax" type="number" min="0" max="50" step="0.5" placeholder="Any"></label>
+          </div>
+        </div>
+
+        <label class="field">
+          <span>Maximum camber (% chord)</span>
+          <input id="camberMax" type="number" min="0" max="20" step="0.25" placeholder="Any">
+        </label>
+
+        <label class="check-row"><input id="symmetricPreference" type="checkbox"><span>Prefer symmetric sections</span></label>
+        <label class="check-row"><input id="measuredPreference" type="checkbox"><span>Prefer entries with polar/test links</span></label>
+        <label class="check-row"><input id="roughnessPreference" type="checkbox"><span>Assume printed or rough surface</span></label>
+
+        <div class="score-legend">
+          <span class="legend-title">Relevance color</span>
+          <div><i class="score-dot excellent"></i>Excellent match</div>
+          <div><i class="score-dot good"></i>Good match</div>
+          <div><i class="score-dot fair"></i>Compromise</div>
+          <div><i class="score-dot poor"></i>Poor / uncertain match</div>
+        </div>
+
+        <div class="source-status">
+          <span class="field-label">Catalog source</span>
+          <p id="catalogStatus">Loading bundled catalog…</p>
+          <button id="refreshCatalog" class="button secondary full">Refresh full catalog</button>
+        </div>
+      </aside>
+
+      <div class="catalog-panel">
+        <div class="catalog-toolbar">
+          <label class="search-box">
+            <span class="sr-only">Search airfoils</span>
+            <input id="searchInput" type="search" placeholder="Search name, family, use case…" autocomplete="off">
+          </label>
+          <label class="compact-field"><span>Sort</span>
+            <select id="sortSelect">
+              <option value="relevance-desc">Relevance: best first</option>
+              <option value="name-asc">Name: A–Z</option>
+              <option value="name-desc">Name: Z–A</option>
+              <option value="thickness-desc">Thickness: high–low</option>
+              <option value="thickness-asc">Thickness: low–high</option>
+              <option value="camber-desc">Camber: high–low</option>
+              <option value="family-asc">Family</option>
+              <option value="status">Project status</option>
+            </select>
+          </label>
+          <label class="compact-field"><span>Rows</span>
+            <select id="pageSizeSelect"><option>50</option><option selected>100</option><option>250</option></select>
+          </label>
+          <button id="viewToggle" class="button secondary" aria-label="Toggle card and table view">Cards</button>
+        </div>
+
+        <div class="results-meta">
+          <span id="resultCount">0 airfoils</span>
+          <span id="rankingExplanation">Ranked against current project settings.</span>
+        </div>
+
+        <div id="airfoilTableWrap" class="table-wrap">
+          <table class="airfoil-table">
+            <thead>
+              <tr>
+                <th class="score-column">Match</th>
+                <th>Airfoil</th>
+                <th>Family</th>
+                <th>Geometry</th>
+                <th>Operating use</th>
+                <th>Evidence</th>
+                <th>Project</th>
+              </tr>
+            </thead>
+            <tbody id="airfoilRows"></tbody>
+          </table>
+        </div>
+        <div id="airfoilCards" class="airfoil-cards" hidden></div>
+
+        <div class="pagination" id="pagination">
+          <button id="prevPage" class="button secondary">Previous</button>
+          <span id="pageInfo">Page 1</span>
+          <button id="nextPage" class="button secondary">Next</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="compareView" class="compare-view" hidden>
+      <div class="compare-header">
+        <div><span class="eyebrow">NORMALIZED COMPARISON</span><h2>Selected airfoils</h2></div>
+        <button id="clearCompare" class="button secondary">Clear comparison</button>
+      </div>
+      <div id="compareEmpty" class="empty-state">Select up to six airfoils from the catalog.</div>
+      <div id="compareContent" hidden>
+        <div class="chart-card"><canvas id="compareCanvas" width="1200" height="420"></canvas></div>
+        <div id="compareTableWrap" class="table-wrap"></div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="detailDialog" class="detail-dialog">
+    <form method="dialog"><button class="dialog-close" aria-label="Close details">×</button></form>
+    <div id="detailContent"></div>
+  </dialog>
+
+  <dialog id="projectDialog" class="settings-dialog">
+    <form id="projectForm" method="dialog">
+      <div class="dialog-heading"><div><span class="eyebrow">OPERATING POINT</span><h2>Project settings</h2></div><button class="dialog-close" value="cancel" aria-label="Close">×</button></div>
+      <p class="muted">Relevance is based primarily on chord Reynolds number and Mach number, then geometry and mission preferences.</p>
+      <div class="settings-grid">
+        <label class="field"><span>Project name</span><input id="projectName" type="text" placeholder="30 m/s drone"></label>
+        <label class="field"><span>Flight speed (m/s)</span><input id="projectSpeed" type="number" min="0.1" max="400" step="0.1" required></label>
+        <label class="field"><span>Reference chord (m)</span><input id="projectChord" type="number" min="0.005" max="20" step="0.001" required></label>
+        <label class="field"><span>Operating altitude (m)</span><input id="projectAltitude" type="number" min="-500" max="30000" step="10" required></label>
+        <label class="field"><span>Air temperature (°C)</span><input id="projectTemperature" type="number" min="-90" max="60" step="0.5" required></label>
+        <label class="field"><span>Target lift coefficient</span><input id="projectCl" type="number" min="-2" max="5" step="0.05" placeholder="Optional"></label>
+      </div>
+      <div id="projectCalculated" class="calculated-box"></div>
+      <div class="dialog-actions"><button type="button" id="projectReset" class="button secondary">Use drone defaults</button><button type="submit" class="button primary">Save settings</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="dataDialog" class="settings-dialog">
+    <div class="dialog-heading"><div><span class="eyebrow">PROJECT STORAGE</span><h2>Import and export</h2></div><form method="dialog"><button class="dialog-close" aria-label="Close">×</button></form></div>
+    <p class="muted">Statuses, notes, tests, settings, and cached geometry are stored in this browser. Export a project file for backups or team sharing.</p>
+    <div class="data-actions">
+      <button id="exportData" class="button primary">Export project JSON</button>
+      <label class="button secondary file-button">Import project JSON<input id="importData" type="file" accept="application/json,.json"></label>
+      <button id="exportCatalogCsv" class="button secondary">Export ranked catalog CSV</button>
+      <button id="clearData" class="button danger">Clear local project data</button>
+    </div>
+    <div class="notice"><strong>Team use:</strong> this version is local-first and does not send test data to a server. A shared database can be added later without changing the catalog interface.</div>
+  </dialog>
+
+  <template id="testRowTemplate">
+    <tr><td data-field="date"></td><td data-field="speed"></td><td data-field="altitude"></td><td data-field="result"></td><td data-field="notes"></td><td><button class="text-button danger-text" data-action="delete-test">Delete</button></td></tr>
+  </template>
+
+  <footer>
+    <p>Geometry catalog: UIUC-compatible coordinate sources. Recommendations are ranked estimates, not certification data.</p>
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
