@@ -16,19 +16,6 @@ Needed a sortable list of airfoils for a project. Made with AI (sorry). On githu
 - JSON backup/import and CSV exports
 - Responsive, dependency-free static hosting
 
-## Important scope
-
-“Every airfoil” is not a finite, controlled set: proprietary, unpublished, custom, and newly designed sections cannot be exhaustively indexed. This project indexes every entry available from the configured coordinate source. The UIUC source contains roughly 1,650 coordinate entries, and the import script can also ingest any folder of Selig-format `.dat` files.
-
-The app deliberately separates:
-
-1. **Geometry-derived data** — thickness, camber, their chordwise positions, trailing-edge thickness, and approximate symmetry.
-2. **Published evidence** — source and polar links where available.
-3. **Heuristic classifications** — broad family/use/Reynolds recommendations used by the ranking model.
-4. **Your measurements** — flight, tunnel, or bench-test records entered in the browser.
-
-It does not invent lift coefficient, drag coefficient, stall angle, or pitching moment for sections that lack compatible data.
-
 ## Run locally
 
 Opening `index.html` directly will block JSON loading in most browsers. Serve the folder:
