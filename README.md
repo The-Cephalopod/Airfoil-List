@@ -1,6 +1,4 @@
-# Airfoil Atlas
-
-A deployable, static airfoil-selection workspace for UAV and aircraft projects. The default operating point is **30 m/s**, **0.30 m chord**, sea level, and **15 °C**.
+Needed a sortable list of airfoils for a project. Made with AI (sorry). On github becuase I need to host it on a website.
 
 ## What is included
 
