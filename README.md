@@ -73,48 +73,6 @@ python scripts/build_catalog.py --source local --local-dir ./my-foils --include-
 
 The script uses only the Python standard library. It records parse failures in the resulting JSON instead of silently dropping them.
 
-## Deploy at `airfoils.finnclayton.com`
-
-### Cloudflare Pages
-
-1. Put this folder in a Git repository.
-2. Create a Pages project from the repository.
-3. Use `python scripts/build_catalog.py --source official` as the optional build command to precompute the full official catalog. Set the output directory to the repository root. Leaving the build command empty still works because the browser can discover the mirror index at runtime.
-4. Add `airfoils.finnclayton.com` as a custom domain in Pages.
-5. Follow the DNS prompt. If DNS is elsewhere, create the requested `CNAME` record for host `airfoils`.
-
-### GitHub Pages
-
-1. Push the contents to a repository.
-2. Push to the `main` branch and select **GitHub Actions** as the Pages source. The included workflow builds the full official catalog, falls back to the mirror if necessary, and deploys the root folder.
-3. Enter `airfoils.finnclayton.com` under **Custom domain**.
-4. Create the DNS record GitHub requests. The included `CNAME` file preserves the custom domain during deployment.
-
-### Netlify
-
-Drag the folder into Netlify Deploys or connect the repository, then assign the subdomain in **Domain management**. No build command is required.
-
-## Project data and collaboration
-
-This version is local-first. Notes, statuses, test records, comparison selections, settings, and fetched geometry are saved in browser `localStorage`. They are not uploaded anywhere.
-
-Use **Data → Export project JSON** to back up or share a project, then import it on another machine. For simultaneous multi-user editing, replace the storage functions at the end of `app.js` with a database API such as Supabase, Firebase, or your own backend.
-
-## Ranking model
-
-The score is a screening tool, not an aerodynamic solver. It combines:
-
-- Reynolds-number compatibility
-- Mach-number compatibility
-- Mission labels
-- Geometry and stabilizer suitability
-- Evidence/provenance quality
-- User preferences for thickness, camber, symmetry, roughness tolerance, and test evidence
-
-Changing a preference changes each row’s color and ordering; it does not remove candidates. Name search and project collections are the only intentional narrowing mechanisms.
-
-For final selection, compare candidates at the actual Reynolds number, transition/roughness condition, angle-of-attack range, and target lift coefficient. Then account for three-dimensional wing planform, aspect ratio, twist, control surfaces, propeller slipstream, structural constraints, and stability margins.
-
 ## Files
 
 - `index.html` — application shell
